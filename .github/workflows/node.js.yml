@@ -30,6 +30,8 @@ jobs:
       run: |
          touch .env
          echo NEXT_PUBLIC_CONVEX_URL="https://youthful-seahorse-517.convex.cloud" >> .env
+         echo NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_YWxsb3dpbmctcXVldHphbC04MS5jbGVyay5hY2NvdW50cy5kZXYk >> .env
+         echo CONVEX_DEPLOYMENT=dev:youthful-seahorse-517 >> .env
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test --if-present
