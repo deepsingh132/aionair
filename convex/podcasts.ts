@@ -1,6 +1,18 @@
 import { ConvexError, v } from "convex/values";
 
-import { mutation, query } from "./_generated/server";
+import { MutationCtx, mutation, query } from "./_generated/server";
+
+type User = {
+  _id: string;
+  email: string;
+  imageUrl: string;
+  clerkId: string;
+  name: string;
+  subscriptionId?: string;
+  endsOn?: number;
+  plan?: string;
+  totalPodcasts: number;
+};
 
 // create podcast mutation
 export const createPodcast = mutation({
@@ -33,7 +45,14 @@ export const createPodcast = mutation({
       throw new ConvexError("User not found");
     }
 
-    return await ctx.db.insert("podcasts", {
+    const isSubscribed =
+      user[0].subscriptionId && user[0].endsOn && user[0].endsOn > new Date().getTime();
+
+    const voiceType = isSubscribed ? args.voiceType : "alloy";
+
+    await handlePodcastSubscription(ctx, user[0]);
+
+    const newPodcast = await ctx.db.insert("podcasts", {
       audioStorageId: args.audioStorageId,
       user: user[0]._id,
       podcastTitle: args.podcastTitle,
@@ -45,13 +64,52 @@ export const createPodcast = mutation({
       authorId: user[0].clerkId,
       voicePrompt: args.voicePrompt,
       imagePrompt: args.imagePrompt,
-      voiceType: args.voiceType,
+      voiceType: voiceType,
       views: args.views,
       authorImageUrl: user[0].imageUrl,
       audioDuration: args.audioDuration,
     });
+
+    // update the totalPodcasts of the user
+    await ctx.db.patch(user[0]._id, {
+      totalPodcasts: user[0].totalPodcasts + 1,
+    });
+
+    return newPodcast;
   },
 });
+
+// function to handle the podcasts based on user subscription
+export const handlePodcastSubscription = async (ctx: MutationCtx,
+  user: User
+) => {
+
+  const plan = user.plan? user.plan : "FREE";
+
+  switch (plan.toUpperCase()) {
+    case "FREE":
+      if (user.totalPodcasts >= 5) {
+        throw new ConvexError("You have exceeded the limit of podcasts for this month");
+      }
+      break;
+    case "PRO":
+      if (user.totalPodcasts >= 30) {
+        throw new ConvexError("You have exceeded the limit of podcasts for this month");
+      }
+      break;
+    case "ENTERPRISE":
+      if (user.totalPodcasts >= 100) {
+        throw new ConvexError("You have exceeded the limit of podcasts for this month");
+      }
+      break;
+    default:
+      if (user.totalPodcasts >= 5) {
+        throw new ConvexError("You have exceeded the limit of podcasts for this month");
+      }
+      break;
+  }
+
+};
 
 // this mutation is required to generate the url after uploading the file to the storage.
 export const getUrl = mutation({

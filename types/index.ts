@@ -105,6 +105,11 @@ export interface AudioContextType {
   setAudio: React.Dispatch<React.SetStateAction<AudioProps | undefined>>;
 }
 
+export interface IsFetchingContextType {
+  isFetching: boolean;
+  setIsFetching: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 export interface PodcastCardProps {
   imgUrl: string;
   title: string;
@@ -119,6 +124,7 @@ export interface CarouselProps {
 export interface ProfileCardProps {
   podcastData: ProfilePodcastProps;
   imageUrl: string;
+  profileId: string;
   userFirstName: string;
 }
 
