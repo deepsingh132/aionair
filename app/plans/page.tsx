@@ -4,8 +4,7 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useGetPlan, useIsSubscribed } from "@/hooks/useIsSubscribed";
 import { useClerk } from "@clerk/nextjs";
@@ -25,6 +24,8 @@ import { useIsFetching } from "@/providers/IsFetchingProvider";
 import LoaderSpinner from "@/components/LoaderSpinner";
 import { pricingPlans } from "@/constants";
 import ButtonSpinner from "@/components/ButtonSpinner";
+import { Suspense } from "react";
+import SearchParams from "@/components/SearchParams";
 
 type planDetails = {
   subscriptionId: string | null;
@@ -38,7 +39,6 @@ export default function Payments() {
   const [annual, setAnnual] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
-  const searchParams = useSearchParams();
   const { user } = useClerk();
   const { toast } = useToast();
   const { isFetching } = useIsFetching();
@@ -155,7 +155,6 @@ export default function Payments() {
   };
 
   const handleManageSubscription = async () => {
-
     try {
       setSelectedPlan("manage");
       setIsLoaded(true);
@@ -172,27 +171,17 @@ export default function Payments() {
         variant: "destructive",
       });
     }
+  };
+
+  function SuspenseFallback() {
+    return (
+      <div className="fixed top-0 left-0 z-50 w-full h-full bg-[--primary-color] flex items-center justify-center">
+        <LoaderSpinner />
+      </div>
+    );
   }
 
-  // if the payment was successful, the user will be redirected to the plans page with a query parameter.
-  // This block checks for the query parameter and displays a success message to the user.
-  useEffect(() => {
-    if (searchParams.get("session_id") && isSubscribed) {
-      setSuccess(true);
-
-      toast({
-        title: "Payment successful ✅",
-        variant: "success",
-      });
-    }
-    // remove the query parameter from the URL and update the state after 5 seconds.
-    setTimeout(() => {
-      router.replace("/plans");
-      setSuccess(false);
-    }, 5000);
-  }, [searchParams, isSubscribed, toast, router]);
-
-  if (success) {
+  if (!isFetching && success) {
     return (
       <main className="flex relative flex-col w-full items-center justify-center min-h-screen bg-zinc-950">
         <Image
@@ -216,6 +205,9 @@ export default function Payments() {
 
   return (
     <>
+      <Suspense fallback={<SuspenseFallback />}>
+          <SearchParams setSuccess={setSuccess} />
+      </Suspense>
       {isFetching && !isSubscribed ? (
         <div className="fixed top-0 left-0 z-50 w-full h-full bg-[--primary-color] flex items-center justify-center">
           <LoaderSpinner />
@@ -264,8 +256,8 @@ export default function Payments() {
                             title="Manage"
                             className="w-[fit-content] hover:brightness-[.85] bg-[--accent-color] text-white-1"
                           >
-                              {isLoaded && selectedPlan === "manage" ? (
-                            <ButtonSpinner />
+                            {isLoaded && selectedPlan === "manage" ? (
+                              <ButtonSpinner />
                             ) : null}
                             Manage
                           </Button>
@@ -276,7 +268,7 @@ export default function Payments() {
                             className="w-[fit-content] hover:brightness-[.85] bg-red-500 text-white-1"
                           >
                             {isLoaded && selectedPlan === "cancel" ? (
-                            <ButtonSpinner />
+                              <ButtonSpinner />
                             ) : null}
                             Cancel
                           </Button>
