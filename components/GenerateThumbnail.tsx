@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from './ui/button'
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { GenerateThumbnailProps } from '@/types';
-import { Loader } from 'lucide-react';
+import { Loader , Lock, LockKeyhole} from 'lucide-react';
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { useToast } from './ui/use-toast';
@@ -12,6 +12,14 @@ import { useAction, useMutation } from 'convex/react';
 import { useUploadFiles } from '@xixixao/uploadstuff/react';
 import { api } from '@/convex/_generated/api';
 import { v4 as uuidv4 } from 'uuid';
+import { useGetPlan, useIsSubscribed } from '@/hooks/useIsSubscribed';
+import { useClerk } from '@clerk/nextjs';
+
+type planDetails = {
+  subscriptionId: string;
+  endsOn: number;
+  plan: string;
+};
 
 const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, setImagePrompt }: GenerateThumbnailProps) => {
   const [isAiThumbnail, setIsAiThumbnail] = useState(false);
@@ -21,7 +29,13 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const { startUpload } = useUploadFiles(generateUploadUrl)
   const getImageUrl = useMutation(api.podcasts.getUrl);
-  const handleGenerateThumbnail = useAction(api.openai.generateThumbnailAction)
+
+
+  const { user } = useClerk();
+  const isSubscribed = useIsSubscribed(user?.id!);
+  const { plan } = useGetPlan(user?.id!) as planDetails;
+
+  const handleGenerateThumbnail = useAction(api.openai.generateThumbnailAction);
 
   const handleImage = async (blob: Blob, fileName: string) => {
     setIsImageLoading(true);
@@ -88,31 +102,66 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
     }
   }
 
+  useEffect(() => {
+    if (!isSubscribed) {
+      setIsAiThumbnail(false);
+    }
+  }, [isSubscribed])
+
+
+  function handleGenerateButton(state: boolean) {
+    // do not allow the isAiThumbnail to be true if the user is not a subscriber
+    if ((!isSubscribed || plan === "FREE")) {
+      setIsAiThumbnail(false);
+      toast({
+        title: "Please subscribe to use this feature",
+      })
+
+      return;
+    }
+
+    setIsAiThumbnail(state);
+  }
+
   return (
     <>
       <div className="generate_thumbnail">
         <Button
           type="button"
           variant="plain"
-          onClick={() => setIsAiThumbnail(true)}
-          className={cn('', {
-            'bg-black-6': isAiThumbnail
+          disabled={isSubscribed && plan === "FREE"}
+          onClick={() => handleGenerateButton(true)}
+          className={cn(`${
+            isAiThumbnail ? "bg-black-6" : "" } ${
+            !isSubscribed ? "cursor-not-allowed" : ""
+          }`, {
+            "bg-black-6": isAiThumbnail,
           })}
         >
-          Use AI to generate thumbnail
+          {
+            // show a lock icon if the user is not a subscriber
+            !isSubscribed || plan === "FREE" ? (
+              <div className='flex justify-center items-center'>
+                <LockKeyhole size={20} className="mr-2" />
+                <span>Use AI to generate thumbnail</span>
+              </div>
+            ) : (
+              "Use AI to generate thumbnail"
+            )
+          }
         </Button>
         <Button
           type="button"
           variant="plain"
           onClick={() => setIsAiThumbnail(false)}
-          className={cn('', {
-            'bg-black-6': !isAiThumbnail
+          className={cn("", {
+            "bg-black-6": !isAiThumbnail,
           })}
         >
           Upload custom image
         </Button>
       </div>
-      {isAiThumbnail ? (
+      {isAiThumbnail && isSubscribed ? (
         <div className="flex flex-col gap-5">
           <div className="mt-5 flex flex-col gap-2.5">
             <Label className="text-16 font-bold text-white-1">
@@ -120,23 +169,27 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
             </Label>
             <Textarea
               className="input-class font-light focus-visible:ring-offset-[--accent-color]"
-              placeholder='Provide a short description to generate thumbnail'
+              placeholder="Provide a short description to generate thumbnail"
               rows={5}
               value={imagePrompt}
               onChange={(e) => setImagePrompt(e.target.value)}
             />
           </div>
           <div className="w-full max-w-[200px]">
-          <Button type="submit" className="text-16 bg-[--accent-color] py-4 font-bold text-white-1" onClick={generateImage}>
-            {isImageLoading ? (
-              <>
-                Generating
-                <Loader size={20} className="animate-spin ml-2" />
-              </>
-            ) : (
-              'Generate'
-            )}
-          </Button>
+            <Button
+              type="submit"
+              className="text-16 bg-[--accent-color] py-4 font-bold text-white-1"
+              onClick={generateImage}
+            >
+              {isImageLoading ? (
+                <>
+                  Generating
+                  <Loader size={20} className="animate-spin ml-2" />
+                </>
+              ) : (
+                "Generate"
+              )}
+            </Button>
           </div>
         </div>
       ) : (
@@ -148,18 +201,25 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
             onChange={(e) => uploadImage(e)}
           />
           {!isImageLoading ? (
-            <Image src="/icons/upload-image.svg" width={40} height={40} alt="upload" />
-          ): (
+            <Image
+              src="/icons/upload-image.svg"
+              width={40}
+              height={40}
+              alt="upload"
+            />
+          ) : (
             <div className="text-16 flex-center font-medium text-white-1">
               Uploading
               <Loader size={20} className="animate-spin ml-2" />
             </div>
           )}
           <div className="flex flex-col items-center gap-1">
-           <h2 className="text-12 font-bold text-[--accent-color]">
-            Click to upload
+            <h2 className="text-12 font-bold text-[--accent-color]">
+              Click to upload
             </h2>
-            <p className="text-12 font-normal text-gray-1">SVG, PNG, JPG, or GIF (max. 1080x1080px)</p>
+            <p className="text-12 font-normal text-gray-1">
+              SVG, PNG, JPG, or GIF (max. 1080x1080px)
+            </p>
           </div>
         </div>
       )}
@@ -175,7 +235,7 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
         </div>
       )}
     </>
-  )
+  );
 }
 
 export default GenerateThumbnail

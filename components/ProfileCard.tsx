@@ -7,11 +7,19 @@ import { PodcastProps, ProfileCardProps } from "@/types";
 
 import LoaderSpinner from "./LoaderSpinner";
 import { Button } from "./ui/button";
+import { useIsSubscribed, useGetPlan } from "@/hooks/useIsSubscribed";
+
+type planDetails = {
+  subscriptionId: string;
+  endsOn: number;
+  plan: string;
+};
 
 const ProfileCard = ({
   podcastData,
   imageUrl,
   userFirstName,
+  profileId,
 }: ProfileCardProps) => {
   const { setAudio } = useAudio();
 
@@ -22,6 +30,9 @@ const ProfileCard = ({
 
     setRandomPodcast(podcastData.podcasts[randomIndex]);
   };
+
+  const isSubscribed = useIsSubscribed(profileId);
+  const { plan } = useGetPlan(profileId) as planDetails;
 
   useEffect(() => {
     if (randomPodcast) {
@@ -51,18 +62,32 @@ const ProfileCard = ({
           <figure className="flex gap-2 max-md:justify-center">
             <Image
               src="/icons/verified.svg"
-              width={15}
-              height={15}
+              width={24}
+              height={24}
               alt="verified"
             />
             <h2 className="text-14 font-medium text-white-2">
               Verified Creator
             </h2>
           </figure>
-          <h1 className="text-32 font-extrabold tracking-[-0.32px] text-white-1">
-            {userFirstName}
-          </h1>
+          <div className="flex gap-4 items-center justify-stretch">
+            <h1 className="text-32 font-extrabold mr-2 tracking-[-0.32px] text-white-1">
+              {userFirstName}
+            </h1>
+            {isSubscribed && (
+              <figure className="inline-flex gap-2 cursor-pointer max-md:justify-center">
+                <Image
+                  src="/icons/premium.svg"
+                  width={24}
+                  height={24}
+                  alt="premium"
+                />
+                <h2 className="text-16 font-semibold text-white-2">{plan}</h2>
+              </figure>
+            )}
+          </div>
         </div>
+
         <figure className="flex gap-3 py-6">
           <Image
             src="/icons/headphone.svg"

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "stripe:listen": "stripe listen --forward-to https://youthful-seahorse-517.convex.site/stripe",
+    "stripe:trigger": "stripe trigger payment_intent.succeeded"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.1.2",
@@ -21,6 +23,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "convex": "^1.12.0",
+    "convex-helpers": "^0.1.43",
     "embla-carousel": "^8.1.3",
     "embla-carousel-autoplay": "^8.1.3",
     "embla-carousel-react": "^8.1.3",
@@ -30,6 +33,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.51.5",
+    "stripe": "^15.12.0",
     "svix": "^1.24.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",

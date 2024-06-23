@@ -15,6 +15,7 @@ const LeftSidebar = () => {
   const router = useRouter();
   const { signOut } = useClerk();
   const { audio } = useAudio();
+  const { user } = useClerk();
 
   return (
     <section className={cn("left_sidebar h-[calc(100vh-1px)]", {
@@ -29,7 +30,9 @@ const LeftSidebar = () => {
         {sidebarLinks.map(({ route, label, imgURL }) => {
           const isActive = pathname === route || pathname.startsWith(`${route}/`);
 
-          return <Link href={route} key={label} className={cn("flex gap-3 items-center py-4 max-lg:px-4 justify-center lg:justify-start", {
+          return <Link href={
+            route === '/profile' && user?.id ? `${route}/${user?.id}` : route
+          } key={label} className={cn("flex gap-3 items-center py-4 max-lg:px-4 justify-center lg:justify-start", {
             'bg-nav-focus border-r-4 border-[--accent-color]': isActive
           })}>
             <Image src={imgURL} alt={label} width={24} height={24} />

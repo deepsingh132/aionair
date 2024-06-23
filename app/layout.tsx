@@ -3,7 +3,8 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import ConvexClerkProvider from "../providers/ConvexClerkProvider";
 import AudioProvider from "@/providers/AudioProvider";
-// import Script from "next/script";
+import { Toaster } from "@/components/ui/toaster";
+import IsFetchingProvider  from "@/providers/IsFetchingProvider";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -22,13 +23,16 @@ export default function RootLayout({
 }>) {
   return (
     <ConvexClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
+        <IsFetchingProvider>
         <AudioProvider>
           <body className={`${manrope.className}`}>
-              {children}
+              <Toaster />
+            {children}
           </body>
           {/* <Script async src="https://js.stripe.com/v3/pricing-table.js"></Script> */}
-        </AudioProvider>
+          </AudioProvider>
+        </IsFetchingProvider>
       </html>
     </ConvexClerkProvider>
   );
