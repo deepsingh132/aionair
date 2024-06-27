@@ -191,7 +191,7 @@ export const generateThumbnailAction = action({
     await handleLimitations(ctx, user, undefined);
 
     const response = await openai.images.generate({
-      model: "dall-e-2",
+      model: "dall-e-3",
       prompt,
       size: "1024x1024",
       quality: "standard",
