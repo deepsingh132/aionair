@@ -236,8 +236,8 @@ export default function Payments() {
                     Plan details
                   </h2>
                   <div className="flex flex-col w-full mx-auto">
-                    <p className="flex relative justify-between items-center text-base text-slate-300">
-                      <div className="flex items-center self-start gap-2">
+                    <p className="flex md:flex-row flex-col relative justify-between md:items-center text-base text-slate-300">
+                      <span className="flex items-center self-start gap-2">
                         Your current plan is the {planDetails.plan} plan{" "}
                         {
                           // display billed annually if the planDetails.endsOn date is greater than 30 days from now
@@ -248,9 +248,9 @@ export default function Payments() {
                             </span>
                           ) : null
                         }
-                      </div>
+                      </span>
                       {
-                        <div className="flex gap-4">
+                        <span className="flex items-center justify-stretch md:my-0 my-4 gap-4">
                           <Button
                             onClick={() => handleManageSubscription()}
                             title="Manage"
@@ -272,7 +272,7 @@ export default function Payments() {
                             ) : null}
                             Cancel
                           </Button>
-                        </div>
+                        </span>
                       }
                     </p>
 

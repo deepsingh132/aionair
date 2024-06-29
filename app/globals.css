@@ -8,13 +8,15 @@
   box-sizing: border-box;
 }
 
-html {
-  background-color: #201114;
-}
+
 
 :root {
   --primary-color: #00040e;
   --accent-color: #00BCD4;
+}
+
+html {
+  background-color: var(--primary-color);
 }
 
 @layer utilities {
@@ -25,10 +27,10 @@ html {
     @apply grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4;
   }
   .right_sidebar {
-    @apply sticky right-0 top-0 flex w-[310px] flex-col overflow-y-hidden border-none bg-black-1 px-[30px] pt-8 max-xl:hidden;
+    @apply sticky right-0 top-0 flex w-[310px] flex-col rounded-l-xl overflow-y-hidden border-none bg-black-1 px-[30px] pt-8 max-xl:hidden;
   }
   .left_sidebar {
-    @apply sticky left-0 top-0 flex w-fit flex-col  justify-between  border-none  bg-black-1 pt-8 text-white-1 max-md:hidden lg:w-[270px] lg:pl-8;
+    @apply sticky left-0 top-0 flex w-fit flex-col rounded-r-xl justify-between  border-none  bg-black-1 pt-8 text-white-1 max-md:hidden lg:w-[270px] lg:pl-8;
   }
   .generate_thumbnail {
     @apply mt-[30px] flex w-full max-w-[520px] flex-col justify-between gap-2 rounded-lg border border-black-6 bg-black-1 px-2.5 py-2 md:flex-row md:gap-0;
@@ -117,6 +119,11 @@ html {
 /* ======= clerk overrides ======== */
 .cl-socialButtonsIconButton {
   border: 2px solid #222429;
+  background-color: #222429;
+}
+.cl-socialButtonsIconButton:hover {
+  background-color: rgba(34, 36, 41, 0.2);
+  border: 2px solid #00BCD4;
 }
 .cl-button {
   color: white;

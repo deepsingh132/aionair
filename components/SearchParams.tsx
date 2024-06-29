@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useToast } from "./ui/use-toast";
 import { useIsSubscribed } from "@/hooks/useIsSubscribed";
@@ -15,6 +15,7 @@ export default function SearchParams({ setSuccess } : { setSuccess: (value: bool
   const { user } = useClerk();
   const isSubscribed = useIsSubscribed(user?.id ?? "");
   const isFetching = useIsFetching();
+  const pathname = usePathname();
 
   // if the payment was successful, the user will be redirected to the plans page with a query parameter.
   // This block checks for the query parameter and displays a success message to the user.
@@ -29,10 +30,12 @@ export default function SearchParams({ setSuccess } : { setSuccess: (value: bool
     }
     // remove the query parameter from the URL and update the state after 5 seconds.
     setTimeout(() => {
+      if (pathname !== "/plans" || !searchParams.get("session_id")) return;
+
       router.replace("/plans");
       setSuccess(false);
     }, 5000);
-  }, [isFetching, isSubscribed, router, searchParams, setSuccess, toast]);
+  }, []);
 
   return null;
 }
