@@ -16,13 +16,13 @@
   </div>
 
   <h1 align="center">OnAir.ai Podcast Platform</h1>
-  
+
   ![GitHub deployments](https://img.shields.io/github/deployments/deepsingh132/aionair/production?label=build)
   [![Node.js CI](https://github.com/deepsingh132/aionair/actions/workflows/node.js.yml/badge.svg)](https://github.com/deepsingh132/aionair/actions/workflows/node.js.yml)
-  [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebook/react/blob/main/LICENSE) 
+  [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebook/react/blob/main/LICENSE)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
 
-  
+
 
 </div>
 
@@ -47,6 +47,7 @@ A cutting-edge AI SaaS platform that enables users to create, discover, and enjo
 - TypeScript
 - Convex
 - OpenAI
+- Stripe (for payments)
 - Clerk
 - ShadCN
 - Tailwind CSS
@@ -78,13 +79,24 @@ and many more, including code architecture and reusability
 
 ## <a name="screenshots">📸 Screenshots</a>
 
-<div align="center">
-  <img src="assets/screenshots/home.png" alt="Home Page" style="border-radius:12px; max-width:100%;">
-  <img src="assets/screenshots/discover.png" alt="Discover Page" style="border-radius:12px; max-width:100%;">
-  <img src="assets/screenshots/create.png" alt="Create Podcast Page" style="border-radius:12px; max-width:100%;">
-  <img src="assets/screenshots/podcast.png" alt="Podcast Details Page" style="border-radius:12px; max-width:100%;">
-  <img src="assets/screenshots/profile.png" alt="Profile Page" style="border-radius:12px; max-width:100%;">
-</div>
+| Homepage |
+| :-----------: |
+|  <img src="assets/screenshots/home.png" alt="Home Page" style="border-radius:12px; max-width:100%;">  |
+| Discover Page |
+| <img src="assets/screenshots/discover.png" alt="Discover Page" style="border-radius:12px; max-width:100%;">   |
+| Create Podcast Page |
+| <img src="assets/screenshots/create.png" alt="Create Podcast Page" style="border-radius:12px; max-width:100%;"> |
+| Podcast Details Page |
+|  <img src="assets/screenshots/podcast.png" alt="Podcast Details Page" style="border-radius:12px; max-width:100%;"> |
+| Profile Page |
+|  <img src="assets/screenshots/profile.png" alt="Profile Page" style="border-radius:12px; max-width:100%;"> |
+| Plans Page |
+|  <img src="assets/screenshots/plans.png" alt="Plans Page" style="border-radius:12px; max-width:100%;"> |
+| Payment / Stripe Checkout Page |
+|  <img src="assets/screenshots/stripe.png" alt="Payment Page" style="border-radius:12px; max-width:100%;"> |
+| Usage Page |
+|  <img src="assets/screenshots/usage.png" alt="Usage Page" style="border-radius:12px; max-width:100%;"> |
+
 
 ## <a name="getting-started">🤸 Getting Started</a>
 
@@ -124,6 +136,9 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL='/sign-in'
 NEXT_PUBLIC_CLERK_SIGN_UP_URL='/sign-up'
+OPENAI_API_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
 ```
 
 Replace the placeholder values with your actual Convex & Clerk credentials. You can obtain these credentials by signing up on the [Convex](https://www.convex.dev/) and [Clerk](https://clerk.com/) websites.
@@ -135,6 +150,19 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
+
+**Testing Stripe Payments**
+
+To test the Stripe payments/subscriptions functionality, you can use the following test card details:
+
+- **Card Number**: 4242 4242 4242 4242
+- **Expiry Date**: Any future date
+- **CVC/CVV**: Any 3-digit number
+- **Cardholder Name**: Any name
+- **Address**: Any address (e.g., 123 Main Street)
+- **ZIP Code**: Any 5-digit number
+
+You can also use the [Stripe Test Cards](https://docs.stripe.com/testing#cards) for more test card details.
 
 
 ## <a name="license">📚 License</a>
