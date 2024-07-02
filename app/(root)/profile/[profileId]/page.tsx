@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 
 import EmptyState from "@/components/EmptyState";
@@ -8,22 +9,34 @@ import PodcastCard from "@/components/PodcastCard";
 import ProfileCard from "@/components/ProfileCard";
 import { api } from "@/convex/_generated/api";
 import { ProfilePodcastProps } from "@/types";
-
 const ProfilePage = ({
   params,
 }: {
   params: {
     profileId: string;
   };
-}) => {
-  const user = useQuery(api.users.getUserById, {
-    clerkId: params.profileId,
-  });
+  }) => {
+
+  const [isFetching, setIsFetching] = useState(true);
+  const user = useQuery(api.users.getUserById, { clerkId: params.profileId });
   const podcastsData = useQuery(api.podcasts.getPodcastByAuthorId, {
     authorId: params.profileId,
   }) as ProfilePodcastProps;
 
-  if (!user || !podcastsData) return <LoaderSpinner />;
+  useEffect(() => {
+    if (user || user === null) {
+      setIsFetching(false);
+    }
+  }, [user]);
+
+  if (isFetching) return <LoaderSpinner />;
+
+  if (!isFetching && !user)
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <EmptyState title="User not found" />
+      </div>
+    );
 
   return (
     <section className="mt-9 flex flex-col">
@@ -33,7 +46,7 @@ const ProfilePage = ({
       <div className="mt-6 flex flex-col gap-6 max-md:items-center md:flex-row">
         <ProfileCard
           profileId={params.profileId}
-          podcastData={podcastsData}
+          podcastData={podcastsData!}
           imageUrl={user?.imageUrl!}
           userFirstName={user?.name!}
         />

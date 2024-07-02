@@ -41,7 +41,8 @@ export const getUserById = query({
       .unique();
 
     if (!user) {
-      throw new ConvexError("User not found");
+      // throw new ConvexError("User not found");
+      return null;
     }
 
     return user;
@@ -76,7 +77,8 @@ export const getSubscriptionByClerkId = query({
       .first();
 
     if (!user) {
-      throw new ConvexError("User not found");
+      // throw new ConvexError("User not found");
+      return null;
     }
 
     return {
