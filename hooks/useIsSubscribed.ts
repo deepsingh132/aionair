@@ -30,7 +30,7 @@ export function useGetPlan(id: string) {
     setIsFetching(false);
   }, [user]);
 
-  if (!user || !user.plan) return "free";
+  if (!user || !user.plan) return null;
 
   return user;
 }

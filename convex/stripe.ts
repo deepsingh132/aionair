@@ -103,13 +103,6 @@ export const cancelSubscription = action({
 
     await stripe.subscriptions.cancel(subscriptionId);
 
-    await ctx.runMutation(internal.users.updateSubscription, {
-      userId: user.subject,
-      subscriptionId: undefined,
-      endsOn: 0,
-      plan: "Free",
-    });
-
     return { success: true };
   },
 });
@@ -217,32 +210,19 @@ async function handleEvents(
           subscriptionId: updateEvent.id,
           endsOn: updateEvent.current_period_end * 1000, // the subscription ends on the current_period_end date regardless of the cancel_at date
           customerId: updateEvent.customer as string,
-          plan: await getPlanNameFromProductId(
+          plan: updateEvent.cancel_at ? "Free" : // if the subscription is canceled, set the plan to "Free" to prevent the user from being charged again
+            await getPlanNameFromProductId(
             updateEvent.items.data[0].price.product as string
           ),
         });
-        // schedule a function to change the user's plan to "Free" after the cancel_at date
-        if (updateEvent.cancel_at) {
-          await ctx.scheduler.runAt(
-            new Date(updateEvent.cancel_at * 1000),
-            internal.users.updateSubscriptionBySubId,
-            {
-              subscriptionId: updateEvent.id,
-              endsOn: 0,
-              customerId: updateEvent.customer as string,
-              plan: "Free",
-            }
-          );
-        }
-        /**
-         * TODO: Add cancel scheduled task if the subscription is reactivated before the cancel_at date
-         */
         break;
       case "customer.subscription.deleted":
+        // update the user's subscription to "Free" if the subscription is deleted
         await ctx.runMutation(internal.users.updateSubscriptionBySubId, {
           subscriptionId: updateEvent.id,
           endsOn: updateEvent.current_period_end * 1000,
           customerId: completedEvent.customer as string,
+          plan: "Free",
         });
         break;
 

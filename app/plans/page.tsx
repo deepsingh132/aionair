@@ -31,7 +31,7 @@ type planDetails = {
   subscriptionId: string | null;
   plan: string | null;
   endsOn: number | null;
-};
+} | null;
 
 export default function Payments() {
   const [success, setSuccess] = useState(false);
@@ -59,7 +59,7 @@ export default function Payments() {
    */
 
   const podcastsRemaining =
-    planDetails.plan === "Enterprise"
+    planDetails?.plan === "Enterprise"
       ? "unlimited"
       : ((30 - totalPodcasts!) as number);
 
@@ -116,7 +116,7 @@ export default function Payments() {
       return;
     }
 
-    if (planDetails.plan === "Free") {
+    if (planDetails?.plan === "Free") {
       toast({
         title: "Error",
         description: "You cannot cancel a free subscription",
@@ -196,7 +196,7 @@ export default function Payments() {
             Thank you for subscribing!
           </h1>
           <p className=" text-gray-300 mt-4 z-30 text-center">
-            You are now subscribed to the {planDetails.plan} plan.
+            You are now subscribed to the {planDetails?.plan} plan.
           </p>
         </div>
       </main>
@@ -238,11 +238,11 @@ export default function Payments() {
                   <div className="flex flex-col w-full mx-auto">
                     <p className="flex md:flex-row flex-col relative justify-between md:items-center text-base text-slate-300">
                       <span className="flex items-center self-start gap-2">
-                        Your current plan is the {planDetails.plan} plan{" "}
+                        Your current plan is the {planDetails?.plan?? "Free"} plan{" "}
                         {
-                          // display billed annually if the planDetails.endsOn date is greater than 30 days from now
-                          planDetails.endsOn! >
-                          Date.now() + 30 * 24 * 60 * 60 * 1000 ? (
+                          // display billed annually if the planDetails.endsOn date is greater than 31 days from now
+                          planDetails?.endsOn! >
+                          Date.now() + 31 * 24 * 60 * 60 * 1000 ? (
                             <span className="inline-flex me-2 items-center text-xs text-gray-300 bg-gray-700  rounded-full py-0.5 px-2.5">
                               Billed annually
                             </span>
@@ -253,7 +253,8 @@ export default function Payments() {
                         <span className="flex items-center justify-stretch md:my-0 my-4 gap-4">
                           <Button
                             onClick={() => handleManageSubscription()}
-                            title="Manage"
+                              title="Manage"
+                              disabled={isLoaded}
                             className="w-[fit-content] hover:brightness-[.85] bg-[--accent-color] text-white-1"
                           >
                             {isLoaded && selectedPlan === "manage" ? (
@@ -262,23 +263,32 @@ export default function Payments() {
                             Manage
                           </Button>
 
-                          <Button
-                            onClick={() => handleCancellation()}
-                            title="Cancel"
-                            className="w-[fit-content] hover:brightness-[.85] bg-red-500 text-white-1"
-                          >
-                            {isLoaded && selectedPlan === "cancel" ? (
-                              <ButtonSpinner />
-                            ) : null}
-                            Cancel
-                          </Button>
+                            { planDetails?.plan !== "Free" &&
+                              <Button
+                                onClick={() => handleCancellation()}
+                                title="Cancel"
+                                disabled={isLoaded}
+                                className="w-[fit-content] hover:brightness-[.85] bg-red-500 text-white-1"
+                              >
+                                {isLoaded && selectedPlan === "cancel" ? (
+                                  <ButtonSpinner />
+                                ) : null}
+                                Cancel
+                              </Button>
+                            }
                         </span>
                       }
                     </p>
 
                     <p className="text-base text-slate-300">
-                      Your subscription ends on{" "}
-                      {new Date(planDetails.endsOn!).toLocaleDateString()}
+                        Your subscription
+                        {planDetails?.plan !== "Free" ? (
+                          <span className="text-green-500"> renews </span>
+                        ) : (
+                          <span className="text-red-500"> will end </span>
+                        )}
+                        on{" "}
+                        {new Date(planDetails?.endsOn!).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
