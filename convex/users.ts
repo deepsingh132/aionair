@@ -70,14 +70,14 @@ export const isUserSubscribed = async (ctx: QueryCtx | MutationCtx) => {
 
 export const getSubscriptionByClerkId = query({
   args: { clerkId: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args) : Promise<{ subscriptionId: string | undefined, endsOn: number | undefined, plan: string | undefined, customerId: string | undefined} | null | undefined> =>
+  {
     const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
       .first();
 
     if (!user) {
-      // throw new ConvexError("User not found");
       return null;
     }
 

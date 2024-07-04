@@ -89,7 +89,7 @@ export const cancelSubscription = action({
       {
         clerkId: user.subject,
       }
-    );
+    ) as { subscriptionId: string | undefined};
 
     if (!subscriptionId) {
       throw new Error("No subscription found for this user!");
@@ -128,7 +128,11 @@ export const createCustomerPortal = action({
       {
         clerkId: user.subject,
       }
-    );
+    ) as { customerId: string | undefined };
+
+    if (!customerId) {
+      throw new Error("No customer id found for this user!");
+    }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2024-04-10",

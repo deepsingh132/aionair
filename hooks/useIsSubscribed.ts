@@ -7,10 +7,10 @@ export function useIsSubscribed(id: string) {
 
   const { setIsFetching } = useIsFetching();
 
-  const user = useQuery(api.users.getSubscriptionByClerkId, { clerkId: id });
+  const user = useQuery(api.users.getSubscriptionByClerkId, { clerkId: id }); // will be undefined if fetching and null if no subscription or user
 
   useEffect(() => {
-    if (!user) return;
+    if (user === undefined) return;
     setIsFetching(false);
   }, [user]);
 
@@ -26,7 +26,7 @@ export function useGetPlan(id: string) {
   const user = useQuery(api.users.getSubscriptionByClerkId, { clerkId: id });
 
   useEffect(() => {
-    if (!user) return;
+    if (user === undefined) return;
     setIsFetching(false);
   }, [user]);
 
