@@ -16,10 +16,10 @@ import { useGetPlan, useIsSubscribed } from '@/hooks/useIsSubscribed';
 import { useClerk } from '@clerk/nextjs';
 
 type planDetails = {
-  subscriptionId: string;
-  endsOn: number;
-  plan: string;
-};
+  subscriptionId: string | null;
+  endsOn: number | null;
+  plan: string | null;
+} | null;
 
 const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, setImagePrompt }: GenerateThumbnailProps) => {
   const [isAiThumbnail, setIsAiThumbnail] = useState(false);
@@ -33,7 +33,8 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
 
   const { user } = useClerk();
   const isSubscribed = useIsSubscribed(user?.id!);
-  const { plan } = useGetPlan(user?.id!) as planDetails;
+  const planDetails = useGetPlan(user?.id!) as planDetails;
+  const { plan } = planDetails || { plan: "Free" };
 
   const handleGenerateThumbnail = useAction(api.openai.generateThumbnailAction);
 
@@ -111,7 +112,7 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
 
   function handleGenerateButton(state: boolean) {
     // do not allow the isAiThumbnail to be true if the user is not a subscriber
-    if ((!isSubscribed || plan === "FREE")) {
+    if ((!isSubscribed || plan === "Free")) {
       setIsAiThumbnail(false);
       toast({
         title: "Please subscribe to use this feature",
@@ -129,7 +130,7 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
         <Button
           type="button"
           variant="plain"
-          disabled={isSubscribed && plan === "FREE"}
+          disabled={isSubscribed && plan === "Free"}
           onClick={() => handleGenerateButton(true)}
           className={cn(`${
             isAiThumbnail ? "bg-black-6" : "" } ${
@@ -140,7 +141,7 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
         >
           {
             // show a lock icon if the user is not a subscriber
-            !isSubscribed || plan === "FREE" ? (
+            !isSubscribed || plan === "Free" ? (
               <div className='flex justify-center items-center'>
                 <LockKeyhole size={20} className="mr-2" />
                 <span>Use AI to generate thumbnail</span>

@@ -10,10 +10,10 @@ import { Button } from "./ui/button";
 import { useIsSubscribed, useGetPlan } from "@/hooks/useIsSubscribed";
 
 type planDetails = {
-  subscriptionId: string;
-  endsOn: number;
-  plan: string;
-};
+  subscriptionId: string | null;
+  endsOn: number | null;
+  plan: string | null;
+} | null;
 
 const ProfileCard = ({
   podcastData,
@@ -32,7 +32,8 @@ const ProfileCard = ({
   };
 
   const isSubscribed = useIsSubscribed(profileId);
-  const { plan } = useGetPlan(profileId) as planDetails;
+  const planDetails = useGetPlan(profileId) as planDetails;
+  const { plan } = planDetails || {};
 
   useEffect(() => {
     if (randomPodcast) {

@@ -35,6 +35,7 @@ export default function SearchParams({ setSuccess } : { setSuccess: (value: bool
       router.replace("/plans");
       setSuccess(false);
     }, 5000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;
