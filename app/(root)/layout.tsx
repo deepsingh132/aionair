@@ -3,6 +3,8 @@ import MobileNav from "@/components/MobileNav";
 import RightSidebar from "@/components/RightSidebar";
 import Image from "next/image";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import { ErrorBoundary } from "react-error-boundary";
+import EmptyState from "@/components/EmptyState";
 
 export default function RootLayout({
   children,
@@ -25,9 +27,13 @@ export default function RootLayout({
               />
               <MobileNav />
             </div>
-            <div className="flex flex-col md:pb-14">
-              {children}
-            </div>
+            <ErrorBoundary fallback={
+              <div className="flex min-h-screen justify-center items-center">
+                <EmptyState title="Not Found" />  
+              </div>
+            }>
+              <div className="flex flex-col md:pb-14">{children}</div>
+            </ErrorBoundary>
           </div>
         </section>
 

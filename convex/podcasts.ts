@@ -1,6 +1,8 @@
 import { ConvexError, v } from "convex/values";
 
 import { MutationCtx, mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
+import { rateLimit } from "@/lib/rateLimits";
 
 type User = {
   _id: string;
@@ -13,6 +15,8 @@ type User = {
   plan?: string;
   totalPodcasts: number;
 };
+
+const INCREMENTPODCASTVIEWS = "incrementPodcastViews";
 
 // create podcast mutation
 export const createPodcast = mutation({
@@ -151,10 +155,20 @@ export const getAllPodcasts = query({
 // this query will get the podcast by the podcastId.
 export const getPodcastById = query({
   args: {
-    podcastId: v.id("podcasts"),
+    podcastId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.podcastId);
+    try {
+      const podcast = await ctx.db.get(args.podcastId as Id<"podcasts">);
+
+      if (!podcast) {
+        throw new Error("Podcast not found");
+      }
+
+      return podcast;
+    } catch (error) {
+      throw new Error("Podcast not found");
+    }
   },
 });
 
@@ -184,6 +198,34 @@ export const getPodcastByAuthorId = query({
     );
 
     return { podcasts, listeners: totalListeners };
+  },
+});
+
+export const incrementPodcastViews = mutation({
+  args: {
+    podcastId: v.id("podcasts"),
+  },
+  handler: async (ctx, args) => {
+    // TODO: Scale this with a distributed counter
+    const podcast = await ctx.db.get(args.podcastId);
+
+    if (!podcast) {
+      throw new ConvexError("Podcast not found");
+    }
+
+    const newRateLimit = await rateLimit(ctx, {
+      name: INCREMENTPODCASTVIEWS,
+      key: args.podcastId,
+      throws: false,
+    });
+
+    if (!newRateLimit || !newRateLimit.ok) {
+      return;
+    }
+
+    return await ctx.db.patch(args.podcastId, {
+      views: podcast.views + 1,
+    });
   },
 });
 

@@ -11,6 +11,8 @@ export const { checkRateLimit, rateLimit, resetRateLimit } = defineRateLimits({
   generateAudioAction: { kind: "fixed window", rate: 3, period: MINUTE*2 },
   generateThumbnailAction: { kind: "fixed window", rate: 3, period: MINUTE*2 },
   createPodcast: { kind: "fixed window", rate: 3, period: MINUTE*2 },
-  uploadFile: { kind: "fixed window", rate: 3, period: MINUTE*2 },
+  uploadFile: { kind: "fixed window", rate: 3, period: MINUTE * 2 },
+  // only allow 1 view per podcast every 2 minutes
+  incrementPodcastViews: { kind: "fixed window", rate: 1, period: MINUTE*2 },
 
 });
