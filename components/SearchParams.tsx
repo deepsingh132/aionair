@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useToast } from "./ui/use-toast";
-import { useIsSubscribed } from "@/hooks/useIsSubscribed";
+import { useGetPlan } from "@/hooks/useGetPlan";
 import { useClerk } from "@clerk/nextjs";
 import { useIsFetching } from "@/providers/IsFetchingProvider";
 
@@ -13,7 +13,7 @@ export default function SearchParams({ setSuccess } : { setSuccess: (value: bool
   const router = useRouter();
   const { toast } = useToast();
   const { user } = useClerk();
-  const isSubscribed = useIsSubscribed(user?.id ?? "");
+  const isSubscribed = useGetPlan(user?.id ?? "")?.endsOn! > Date.now();
   const isFetching = useIsFetching();
   const pathname = usePathname();
 

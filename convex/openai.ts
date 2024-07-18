@@ -53,13 +53,13 @@ async function handleLimitations(ctx: ActionCtx, user: UserIdentity, voice: stri
   }
 
   // get user subscription
-  const { isSubscribed } = await ctx.runQuery(
+  const { isSubscribed, freeThumbnails } = await ctx.runQuery(
     internal.openai.getUserSubscription,
     {}
   );
 
   // only allow users with a plan to generate thumbnails
-  if (!voice && !isSubscribed) {
+  if (!voice && !isSubscribed && freeThumbnails <= 0) {
     throw new Error("User must have a subscription to generate thumbnails");
   }
 
@@ -175,7 +175,32 @@ export const getUserSubscription = internalQuery({
     return {
       isSubscribed: await isUserSubscribed(ctx),
       plan: user.plan,
+      freeThumbnails: user.freeThumbnails?? 0,
     };
+  },
+});
+
+export const reduceFreeThumbnailsCount = internalMutation({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const user = await getUser(ctx, { clerkId: userId });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    try {
+      if (user.freeThumbnails > 0) {
+        await ctx.db.patch(user._id, {
+          freeThumbnails: user.freeThumbnails - 1,
+        });
+        return;
+      }
+    } catch (error) {
+      throw new Error("Error reducing free thumbnails count");
+    }
+
+    return;
   },
 });
 
@@ -206,6 +231,12 @@ export const generateThumbnailAction = action({
 
     const imageResponse = await fetch(url);
     const buffer = await imageResponse.arrayBuffer();
+
+    // reduce free thumbnails count
+    await ctx.runMutation(internal.openai.reduceFreeThumbnailsCount, {
+      userId: user.subject,
+    });
+
     return buffer;
   },
 });

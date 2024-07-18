@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import Image from "next/image";
-import { useGetPlan, useIsSubscribed } from "@/hooks/useIsSubscribed";
+import { useGetPlan } from "@/hooks/useGetPlan";
 import { useClerk } from "@clerk/nextjs";
 import { useToast } from "@/components/ui/use-toast";
 import LeftSidebar from "@/components/LeftSidebar";
@@ -31,20 +31,23 @@ type planDetails = {
   subscriptionId: string | null;
   plan: string | null;
   endsOn: number | null;
+  freeThumbnails: number | null;
 } | null;
+
+type Plan = "Free" | "Pro" | "Enterprise" | "cancel" | "manage" | "";
 
 export default function Payments() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
   const [annual, setAnnual] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<Plan>("");
   const { user } = useClerk();
   const { toast } = useToast();
   const { isFetching } = useIsFetching();
 
-  const isSubscribed = useIsSubscribed(user?.id ?? "");
   const planDetails = useGetPlan(user?.id ?? "") as planDetails;
+  const isSubscribed = planDetails?.endsOn! > Date.now();
 
   const totalPodcasts = useQuery(api.users.getTotalPodcastsOfUser, {
     clerkId: user?.id ?? "",
@@ -64,9 +67,9 @@ export default function Payments() {
       : ((30 - totalPodcasts!) as number);
 
   const handleUpgrade = async (plan: string) => {
-    setSelectedPlan(plan);
+    setSelectedPlan(plan.charAt(0).toUpperCase() + plan.slice(1) as Plan);
     setIsLoaded(true);
-    if (plan === "Free") {
+    if (plan === "free") {
       router.push("/");
       return;
     }
@@ -116,7 +119,7 @@ export default function Payments() {
       return;
     }
 
-    if (planDetails?.plan === "Free") {
+    if (planDetails?.plan === "free") {
       toast({
         title: "Error",
         description: "You cannot cancel a free subscription",
@@ -238,7 +241,8 @@ export default function Payments() {
                   <div className="flex flex-col w-full mx-auto">
                     <p className="flex md:flex-row flex-col relative justify-between md:items-center text-base text-slate-300">
                       <span className="flex items-center self-start gap-2">
-                        Your current plan is the {planDetails?.plan?? "Free"} plan{" "}
+                          Your current plan is the {planDetails?.plan?.charAt(0).toUpperCase()! + planDetails?.plan?.slice(1)
+                            ?? "Free"} plan{" "}
                         {
                           // display billed annually if the planDetails.endsOn date is greater than 31 days from now
                           planDetails?.endsOn! >
@@ -263,7 +267,7 @@ export default function Payments() {
                             Manage
                           </Button>
 
-                            { planDetails?.plan !== "Free" &&
+                            { planDetails?.plan !== "free" &&
                               <Button
                                 onClick={() => handleCancellation()}
                                 title="Cancel"
@@ -282,7 +286,7 @@ export default function Payments() {
 
                     <p className="text-base text-slate-300">
                         Your subscription
-                        {planDetails?.plan !== "Free" ? (
+                        {planDetails?.plan !== "free" ? (
                           <span className="text-green-500"> renews </span>
                         ) : (
                           <span className="text-red-500"> will end </span>
@@ -458,7 +462,7 @@ export default function Payments() {
                   </div>
                   <div className="flex mt-6">
                     <button
-                      onClick={() => handleUpgrade(plan.name)}
+                      onClick={() => handleUpgrade(plan.name.toLowerCase())}
                       title={plan.name}
                       aria-label="get started"
                       className={`flex items-center justify-center w-full  h-12 px-4 py-2 text-base font-medium transition-all duration-200 rounded-xl ${plan.buttonClass}`}

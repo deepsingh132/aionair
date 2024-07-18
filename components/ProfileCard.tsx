@@ -7,7 +7,7 @@ import { PodcastProps, ProfileCardProps } from "@/types";
 
 import LoaderSpinner from "./LoaderSpinner";
 import { Button } from "./ui/button";
-import { useIsSubscribed, useGetPlan } from "@/hooks/useIsSubscribed";
+import { useGetPlan } from "@/hooks/useGetPlan";
 
 type planDetails = {
   subscriptionId: string | null;
@@ -31,9 +31,9 @@ const ProfileCard = ({
     setRandomPodcast(podcastData.podcasts[randomIndex]);
   };
 
-  const isSubscribed = useIsSubscribed(profileId);
   const planDetails = useGetPlan(profileId) as planDetails;
   const { plan } = planDetails || {};
+  const isSubscribed = planDetails?.endsOn! > Date.now();
 
   useEffect(() => {
     if (randomPodcast) {
@@ -83,7 +83,9 @@ const ProfileCard = ({
                   height={24}
                   alt="premium"
                 />
-                <h2 className="text-16 font-semibold text-white-2">{plan}</h2>
+                <h2 className="text-16 font-semibold text-white-2">
+                  {plan?.charAt(0).toUpperCase()! + plan?.slice(1)}
+                </h2>
               </figure>
             )}
           </div>
