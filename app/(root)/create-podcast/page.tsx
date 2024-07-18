@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,59 +13,63 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { cn } from "@/lib/utils"
-import { use, useState } from "react"
-import { Textarea } from "@/components/ui/textarea"
-import GeneratePodcast from "@/components/GeneratePodcast"
-import GenerateThumbnail from "@/components/GenerateThumbnail"
-import { Loader, Lock, LockKeyhole } from "lucide-react"
-import { Id } from "@/convex/_generated/dataModel"
-import { useToast } from "@/components/ui/use-toast"
-import { useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
-import { useRouter } from "next/navigation"
-import { useIsSubscribed } from "@/hooks/useIsSubscribed"
-import { useClerk } from "@clerk/nextjs"
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { use, useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import GeneratePodcast from "@/components/GeneratePodcast";
+import GenerateThumbnail from "@/components/GenerateThumbnail";
+import { Loader, Lock, LockKeyhole } from "lucide-react";
+import { Id } from "@/convex/_generated/dataModel";
+import { useToast } from "@/components/ui/use-toast";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
+import { useGetPlan } from "@/hooks/useGetPlan";
+import { useClerk } from "@clerk/nextjs";
 
-const voiceCategories = ['alloy', 'shimmer', 'nova', 'echo', 'fable', 'onyx'];
+const voiceCategories = ["alloy", "shimmer", "nova", "echo", "fable", "onyx"];
 
 const formSchema = z.object({
   podcastTitle: z.string().min(2),
   podcastDescription: z.string().min(2),
-})
+});
 
 const CreatePodcast = () => {
-  const router = useRouter()
-  const [imagePrompt, setImagePrompt] = useState('');
-  const [imageStorageId, setImageStorageId] = useState<Id<"_storage"> | null>(null)
-  const [imageUrl, setImageUrl] = useState('');
+  const router = useRouter();
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageStorageId, setImageStorageId] = useState<Id<"_storage"> | null>(
+    null
+  );
+  const [imageUrl, setImageUrl] = useState("");
 
-  const [audioUrl, setAudioUrl] = useState('');
-  const [audioStorageId, setAudioStorageId] = useState<Id<"_storage"> | null>(null)
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioStorageId, setAudioStorageId] = useState<Id<"_storage"> | null>(
+    null
+  );
   const [audioDuration, setAudioDuration] = useState(0);
 
   const [voiceType, setVoiceType] = useState<string | null>(null);
-  const [voicePrompt, setVoicePrompt] = useState('');
+  const [voicePrompt, setVoicePrompt] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const createPodcast = useMutation(api.podcasts.createPodcast)
+  const createPodcast = useMutation(api.podcasts.createPodcast);
 
   const { user } = useClerk();
 
-  const isSubscribed = useIsSubscribed(user?.id!);
+  const isSubscribed = useGetPlan(user?.id!)?.endsOn! > Date.now();
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -74,18 +78,18 @@ const CreatePodcast = () => {
       podcastTitle: "",
       podcastDescription: "",
     },
-  })
+  });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
 
-      if(!audioUrl || !imageUrl || !voiceType) {
+      if (!audioUrl || !imageUrl || !voiceType) {
         toast({
-          title: 'Please generate audio and image',
-        })
+          title: "Please generate audio and image",
+        });
         setIsSubmitting(false);
-        throw new Error('Please generate audio and image')
+        throw new Error("Please generate audio and image");
       }
 
       const podcast = await createPodcast({
@@ -100,17 +104,17 @@ const CreatePodcast = () => {
         audioDuration,
         audioStorageId: audioStorageId!,
         imageStorageId: imageStorageId!,
-      })
-      toast({ title: 'Podcast created' })
+      });
+      toast({ title: "Podcast created" });
       setIsSubmitting(false);
-      router.push('/')
-    } catch (error : any) {
+      router.push("/");
+    } catch (error: any) {
       console.error(error.message);
       toast({
-        title: 'Error',
-        description: error.message? error.message : "Unknown error",
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: error.message ? error.message : "Unknown error",
+        variant: "destructive",
+      });
       setIsSubmitting(false);
     }
   }
@@ -165,7 +169,7 @@ const CreatePodcast = () => {
                   {voiceCategories.map((category) => (
                     <SelectItem
                       // disable all voices except alloy for non-subscribed users
-                      disabled={ category !== 'alloy' && !isSubscribed}
+                      disabled={category !== "alloy" && !isSubscribed}
                       key={category}
                       value={category}
                       className="capitalize relative  flex items-center focus:bg-[--accent-color]"
@@ -175,7 +179,7 @@ const CreatePodcast = () => {
                           <LockKeyhole />
                         </span>
                       )}
-                      {category}
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -248,6 +252,6 @@ const CreatePodcast = () => {
       </Form>
     </section>
   );
-}
+};
 
-export default CreatePodcast
+export default CreatePodcast;

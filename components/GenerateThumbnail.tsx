@@ -12,13 +12,14 @@ import { useAction, useMutation } from 'convex/react';
 import { useUploadFiles } from '@xixixao/uploadstuff/react';
 import { api } from '@/convex/_generated/api';
 import { v4 as uuidv4 } from 'uuid';
-import { useGetPlan, useIsSubscribed } from '@/hooks/useIsSubscribed';
+import { useGetPlan } from '@/hooks/useGetPlan';
 import { useClerk } from '@clerk/nextjs';
 
 type planDetails = {
   subscriptionId: string | null;
   endsOn: number | null;
   plan: string | null;
+  freeThumbnails: number | null | undefined;
 } | null;
 
 const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, setImagePrompt }: GenerateThumbnailProps) => {
@@ -32,9 +33,9 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
 
 
   const { user } = useClerk();
-  const isSubscribed = useIsSubscribed(user?.id!);
   const planDetails = useGetPlan(user?.id!) as planDetails;
-  const { plan } = planDetails || { plan: "Free" };
+  const isSubscribed = planDetails ? planDetails.endsOn! > Date.now() : false;
+  const freeThumbnails = planDetails?.freeThumbnails ?? 0;
 
   const handleGenerateThumbnail = useAction(api.openai.generateThumbnailAction);
 
@@ -104,18 +105,17 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
   }
 
   useEffect(() => {
-    if (!isSubscribed) {
+    if (!isSubscribed && freeThumbnails === 0) {
       setIsAiThumbnail(false);
     }
-  }, [isSubscribed])
-
+  }, [freeThumbnails, isSubscribed])
 
   function handleGenerateButton(state: boolean) {
-    // do not allow the isAiThumbnail to be true if the user is not a subscriber
-    if ((!isSubscribed || plan === "Free")) {
+    if ((!isSubscribed) && freeThumbnails === 0) {
       setIsAiThumbnail(false);
       toast({
-        title: "Please subscribe to use this feature",
+        title:
+          "Your free thumbnails limit has been reached. Please subscribe to generate more thumbnails!",
       })
 
       return;
@@ -130,18 +130,20 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
         <Button
           type="button"
           variant="plain"
-          disabled={isSubscribed && plan === "Free"}
+          // disabled={isSubscribed && plan === "free" && freeThumbnails === 0}
           onClick={() => handleGenerateButton(true)}
           className={cn(`${
             isAiThumbnail ? "bg-black-6" : "" } ${
-            !isSubscribed ? "cursor-not-allowed" : ""
+            !isSubscribed && freeThumbnails === 0
+              ? "cursor-not-allowed text-gray-500" : ""
           }`, {
             "bg-black-6": isAiThumbnail,
           })}
         >
           {
-            // show a lock icon if the user is not a subscriber
-            !isSubscribed || plan === "Free" ? (
+            // show a lock icon if the user is not a subscriber and has no free thumbnails left
+            (!isSubscribed && freeThumbnails === 0)
+              ? (
               <div className='flex justify-center items-center'>
                 <LockKeyhole size={20} className="mr-2" />
                 <span>Use AI to generate thumbnail</span>
@@ -162,7 +164,8 @@ const GenerateThumbnail = ({ setImage, setImageStorageId, image, imagePrompt, se
           Upload custom image
         </Button>
       </div>
-      {isAiThumbnail && isSubscribed ? (
+      {(isAiThumbnail && (isSubscribed || freeThumbnails > 0))
+        ? (
         <div className="flex flex-col gap-5">
           <div className="mt-5 flex flex-col gap-2.5">
             <Label className="text-16 font-bold text-white-1">

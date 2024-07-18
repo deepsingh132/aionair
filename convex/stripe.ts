@@ -9,6 +9,8 @@ type Metadata = {
   userId: string;
 };
 
+type plan = "free" | "pro" | "enterprise";
+
 export const pay = action({
   args: { plan: v.string() },
   handler: async (ctx, args) => {
@@ -34,16 +36,16 @@ export const pay = action({
     let priceId = "";
 
     switch (args.plan) {
-      case "Pro":
+      case "pro":
         priceId = process.env.PRICE_ID_PRO!;
         break;
-      case "Enterprise":
+      case "enterprise":
         priceId = process.env.PRICE_ID_ENTERPRISE!;
         break;
-      case "Pro-annual":
+      case "pro-annual":
         priceId = process.env.PRICE_ID_PRO_ANNUAL!;
         break;
-      case "Enterprise-annual":
+      case "enterprise-annual":
         priceId = process.env.PRICE_ID_ENTERPRISE_ANNUAL!;
         break;
       default:
@@ -142,14 +144,8 @@ export const createCustomerPortal = action({
   },
 });
 
-async function getPlanNameFromProductId(productId: string) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2024-04-10",
-  });
-
-  const product = await stripe.products.retrieve(productId);
-
-  return product.name;
+async function getPlanNameFromProductId(stripe: Stripe, productId: string) {
+  return await stripe.products.retrieve(productId).then((product) => product.name.toLowerCase() as plan);
 }
 
 async function handleEvents(
@@ -187,6 +183,7 @@ async function handleEvents(
           subscriptionId: subscription.id,
           endsOn: subscription.current_period_end * 1000,
           plan: await getPlanNameFromProductId(
+            stripe,
             subscription.items.data[0]?.price.product as string
           ),
           customerId: customerId,
@@ -200,6 +197,7 @@ async function handleEvents(
           endsOn: subscription.current_period_end * 1000,
           customerId: subscription.customer as string,
           plan: await getPlanNameFromProductId(
+            stripe,
             subscription.items.data[0]?.price.product as string
           ),
         });
@@ -210,19 +208,20 @@ async function handleEvents(
           subscriptionId: updateEvent.id,
           endsOn: updateEvent.current_period_end * 1000, // the subscription ends on the current_period_end date regardless of the cancel_at date
           customerId: updateEvent.customer as string,
-          plan: updateEvent.cancel_at ? "Free" : // if the subscription is canceled, set the plan to "Free" to prevent the user from being charged again
+          plan: updateEvent.cancel_at ? "free" : // if the subscription is canceled, set the plan to "free" to prevent the user from being charged again
             await getPlanNameFromProductId(
+              stripe,
             updateEvent.items.data[0].price.product as string
           ),
         });
         break;
       case "customer.subscription.deleted":
-        // update the user's subscription to "Free" if the subscription is deleted
+        // update the user's subscription to "free" if the subscription is deleted
         await ctx.runMutation(internal.users.updateSubscriptionBySubId, {
           subscriptionId: updateEvent.id,
           endsOn: updateEvent.current_period_end * 1000,
           customerId: completedEvent.customer as string,
-          plan: "Free",
+          plan: "free",
         });
         break;
 

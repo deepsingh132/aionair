@@ -70,7 +70,7 @@ export const isUserSubscribed = async (ctx: QueryCtx | MutationCtx) => {
 
 export const getSubscriptionByClerkId = query({
   args: { clerkId: v.string() },
-  handler: async (ctx, args) : Promise<{ subscriptionId: string | undefined, endsOn: number | undefined, plan: string | undefined, customerId: string | undefined} | null | undefined> =>
+  handler: async (ctx, args) : Promise<{ subscriptionId: string | undefined, endsOn: number | undefined, plan: string | undefined, customerId: string | undefined, freeThumbnails: number | undefined} | null | undefined> =>
   {
     const user = await ctx.db
       .query("users")
@@ -86,6 +86,7 @@ export const getSubscriptionByClerkId = query({
       endsOn: user.endsOn,
       plan: user.plan,
       customerId: user.customerId,
+      freeThumbnails: user.freeThumbnails,
     };
   },
 });
@@ -121,13 +122,29 @@ export const getTotalPodcastsOfUser = query({
   },
 });
 
+export const getFreeThumbnailsOfUser = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
+      .unique();
+
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    return user.freeThumbnails;
+  },
+});
+
 
 export const updateSubscription = internalMutation({
   args: {
     subscriptionId: v.optional(v.string()),
     userId: v.string(),
     endsOn: v.number(),
-    plan: v.string(),
+    plan: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),
     customerId: v.optional(v.string())
   },
   handler: async (ctx, args) => {
@@ -151,7 +168,9 @@ export const updateSubscriptionBySubId = internalMutation({
     subscriptionId: v.optional(v.string()),
     endsOn: v.optional(v.number()),
     customerId: v.optional(v.string()),
-    plan: v.optional(v.string()),
+    plan: v.optional(
+      v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise"))
+    ),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db
@@ -217,7 +236,9 @@ export const createUser = internalMutation({
       email: args.email,
       imageUrl: args.imageUrl,
       name: args.name,
+      plan: "free",
       totalPodcasts: 0,
+      freeThumbnails: 3,
     });
   },
 });

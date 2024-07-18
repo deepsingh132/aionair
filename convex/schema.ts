@@ -32,8 +32,9 @@ export default defineSchema({
     subscriptionId: v.optional(v.string()),
     customerId: v.optional(v.string()),
     endsOn: v.optional(v.number()),
-    plan: v.optional(v.string()),
+    plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise"))),
     totalPodcasts: v.number(),
+    freeThumbnails: v.number(),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_subscriptionId", ["subscriptionId"]),
