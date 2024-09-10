@@ -129,7 +129,7 @@ npm install
 
 **Set Up Environment Variables**
 
-Create a new file named `.env` in the root of your project and add the following content:
+Create a new file named `.env` in the root of your project and add the following content to your local env file and on the convex dashboard:
 
 ```env
 CONVEX_DEPLOYMENT=
