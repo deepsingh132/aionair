@@ -31,7 +31,7 @@ jobs:
     - env: 
         NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-        CONVEX_DEPLOYMENT: ${{ vars.CONVEX_DEPLOYMENT }}
+        CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
       run: |
         echo "Convex var: $NEXT_PUBLIC_CONVEX_URL"
         echo "Clerk var: $NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
