@@ -14,9 +14,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Set current date as env variable
+      run: echo "NOW=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+    - name: Echo current date
+      run: echo "$NOW - env:${{ env.NOW }}"
     - name: Build the Docker image
-      run: docker build . --build-arg NEXT_PUBLIC_CONVEX_URL=${{ vars.NEXT_PUBLIC_CONVEX_URL }} --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }} --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/aionair:$(date +%s)
+      run: |
+        docker build . --build-arg NEXT_PUBLIC_CONVEX_URL=${{ vars.NEXT_PUBLIC_CONVEX_URL }} --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }} --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/aionair:$NOW
     - name: Push the Docker image
       run: |
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-        docker push ${{ secrets.DOCKER_USERNAME }}/aionair:$(date +%s)
+        docker push ${{ secrets.DOCKER_USERNAME }}/aionair:$NOW
