@@ -13,6 +13,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
 
     strategy:
       matrix:
@@ -26,6 +27,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - name: display env variables
+      run: |
+        echo "Convex var: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}"
+        echo "Clerk var: ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}"
     - name: create env file
       run: |
          touch .env
