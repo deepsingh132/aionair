@@ -23,7 +23,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - name: Display Environment Variables
+    - name: Use Environment Variables
       run: |
         echo "Convex var: $NEXT_PUBLIC_CONVEX_URL"
         echo "Clerk var: $NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
@@ -32,12 +32,12 @@ jobs:
         NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
         CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
-    - name: Create .env file
-      run: |
-         touch .env
-         echo NEXT_PUBLIC_CONVEX_URL=${{ vars.NEXT_PUBLIC_CONVEX_URL }} >> .env
-         echo NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }} >> .env
-         echo CONVEX_DEPLOYMENT=${{ secrets.CONVEX_DEPLOYMENT }} >> .env
+    # - name: Create .env file
+    #   run: |
+    #      touch .env
+    #      echo NEXT_PUBLIC_CONVEX_URL=${{ vars.NEXT_PUBLIC_CONVEX_URL }} >> .env
+    #      echo NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }} >> .env
+    #      echo CONVEX_DEPLOYMENT=${{ secrets.CONVEX_DEPLOYMENT }} >> .env
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test --if-present
