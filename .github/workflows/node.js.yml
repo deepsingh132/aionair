@@ -13,7 +13,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    environment: ${{ vars.ENVIRONMENT_STAGE }}
+    environment: production
 
     strategy:
       matrix:
@@ -28,9 +28,14 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: display env variables
+    - env: 
+        NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        CONVEX_DEPLOYMENT: ${{ vars.CONVEX_DEPLOYMENT }}
       run: |
-        echo "Convex var: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}"
-        echo "Clerk var: ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}"
+        echo "Convex var: $NEXT_PUBLIC_CONVEX_URL"
+        echo "Clerk var: $NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+        echo "Covex deployment: $CONVEX_DEPLOYMENT"
     - name: create env file
       run: |
          touch .env
