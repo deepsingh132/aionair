@@ -22,7 +22,7 @@
   [![Node.js CI](https://github.com/deepsingh132/aionair/actions/workflows/node.js.yml/badge.svg)](https://github.com/deepsingh132/aionair/actions/workflows/node.js.yml)
   [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebook/react/blob/main/LICENSE)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
-  
+
   [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/deepsingh132)
 
 
@@ -36,8 +36,9 @@
 3. 🔋 [Features](#features)
 4. 📸 [Screenshots](#screenshots)
 5. 🤸 [Getting Started](#getting-started)
-6. 📄 [License](#license)
-7. 📞 [Contact](#contact)
+6. 🐳 [Docker Instructions](#docker)
+7. 📄 [License](#license)
+8. 📞 [Contact](#contact)
 
 
 ## <a name="introduction">🤖 Introduction</a>
@@ -144,7 +145,8 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_SECRET_KEY=
 ```
 
-Replace the placeholder values with your actual Convex & Clerk credentials. You can obtain these credentials by signing up on the [Convex](https://www.convex.dev/) and [Clerk](https://clerk.com/) websites.
+Replace the placeholder values with your actual Convex & Clerk credentials. You can obtain these credentials by signing up on the [Convex](https://www.convex.dev/), [Clerk](https://clerk.com/),
+[OpenAI](https://platform.openai.com/) and [Stripe](https://stripe.com/) websites.
 
 **Running the Project**
 
@@ -167,6 +169,24 @@ To test the Stripe payments/subscriptions functionality, you can use the followi
 
 You can also use the [Stripe Test Cards](https://docs.stripe.com/testing#cards) for more test card details.
 
+## <a name="docker">🐳 Docker Instructions</a>
+
+You can run this project using Docker with the latest image from Docker Hub. Make sure you have Docker installed and running on your machine.
+Follow these steps:
+
+1. Pull the latest image from Docker Hub.
+
+    ```bash
+    docker pull deepsingh132/aionair:latest
+    ```
+
+2. Run the Docker image with the following command:
+
+    ```bash
+    docker run --env-file .YOURENVFILE -p 3000:3000 deepsingh132/aionair:latest
+    ```
+
+3. Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
 
 ## <a name="license">📚 License</a>
 
