@@ -19,7 +19,8 @@ jobs:
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
     - name: Check variables
       run: |
-        echo "convex variable : $NEXT_PUBLIC_CONVEX_URL"
-        echo "clerk variable : $NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+        echo "environment: ${{ vars.ENVIRONMENT_STAGE }}"
+        echo "convex variable : ${{ vars.NEXT_PUBLIC_CONVEX_URL }}"
+        echo "clerk variable : ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}"
     - name: Build the Docker image
-      run: docker build . --build-arg NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --file Dockerfile --tag aionair:$(date +%s)
+      run: docker build . --build-arg NEXT_PUBLIC_CONVEX_URL=${{ vars.NEXT_PUBLIC_CONVEX_URL }} --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }} --file Dockerfile --tag aionair:$(date +%s)
