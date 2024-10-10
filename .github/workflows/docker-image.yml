@@ -14,5 +14,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      env: 
+        NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+    - name: Check variables
+      run: |
+        echo "convex variable : $NEXT_PUBLIC_CONVEX_URL"
+        echo "clerk variable : $NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
     - name: Build the Docker image
-      run: docker build . --build-arg NEXT_PUBLIC_CONVEX_URL=https://youthful-seahorse-517.convex.cloud --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_YWxsb3dpbmctcXVldHphbC04MS5jbGVyay5hY2NvdW50cy5kZXYk --file Dockerfile --tag aionair:$(date +%s)
+      run: docker build . --build-arg NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --file Dockerfile --tag aionair:$(date +%s)
