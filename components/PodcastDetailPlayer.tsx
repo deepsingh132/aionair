@@ -11,7 +11,6 @@ import { PodcastDetailPlayerProps } from "@/types";
 import LoaderSpinner from "./LoaderSpinner";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useClerk } from "@clerk/nextjs";
 
 const PodcastDetailPlayer = ({
   audioUrl,
@@ -26,12 +25,10 @@ const PodcastDetailPlayer = ({
   authorId,
 }: PodcastDetailPlayerProps) => {
   const router = useRouter();
-  const { audio, setAudio } = useAudio();
+  const { setAudio } = useAudio();
   const { toast } = useToast();
-  const { user } = useClerk();
   const [isDeleting, setIsDeleting] = useState(false);
   const deletePodcast = useMutation(api.podcasts.deletePodcast);
-  const incrementViews = useMutation(api.podcasts.incrementPodcastViews);
 
   const handleDelete = async () => {
     try {
@@ -55,14 +52,9 @@ const PodcastDetailPlayer = ({
       audioUrl,
       imageUrl,
       author,
+      authorId,
       podcastId,
     });
-    // increment views if user is not the author and the current audio is not the same as the audio being played
-    if (!isOwner && audio?.audioUrl !== audioUrl) {
-      setTimeout(() => {
-        incrementViews({ podcastId: podcastId });
-      }, 10000);
-    };
   };
 
   if (!imageUrl || !authorImageUrl) return <LoaderSpinner />;

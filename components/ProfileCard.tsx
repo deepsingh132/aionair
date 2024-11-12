@@ -42,6 +42,7 @@ const ProfileCard = ({
         audioUrl: randomPodcast.audioUrl || "",
         imageUrl: randomPodcast.imageUrl || "",
         author: randomPodcast.author,
+        authorId: randomPodcast.authorId,
         podcastId: randomPodcast._id,
       });
     }
