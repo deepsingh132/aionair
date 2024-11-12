@@ -9,7 +9,6 @@ import Carousel from './Carousel';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRouter } from 'next/navigation';
-import LoaderSpinner from './LoaderSpinner';
 import { useAudio } from '@/providers/AudioProvider';
 import { cn } from '@/lib/utils';
 
@@ -22,8 +21,8 @@ const RightSidebar = () => {
 
   return (
     <section className={cn('right_sidebar h-[calc(100vh-5px)]', {
-      'h-[calc(100vh-140px)]': audio?.audioUrl
-    })}>
+        'h-[calc(100vh-113px)]': audio?.audioUrl
+      })}>
       <SignedIn>
         <Link href={`/profile/${user?.id}`} className="flex gap-3 pb-12">
           <UserButton />
@@ -45,8 +44,12 @@ const RightSidebar = () => {
       <section className="flex flex-col gap-8 pt-12">
         <Header headerTitle="Top Creators" />
         <div className="flex flex-col gap-6">
-          {topPodcasters?.slice(0, 3).map((podcaster) => (
-            <div key={podcaster._id} className="flex cursor-pointer justify-between" onClick={() => router.push(`/profile/${podcaster.clerkId}`)}>
+          {topPodcasters?.slice(0, audio?.audioUrl ? 2 : 3).map((podcaster) => (
+            <div
+              key={podcaster._id}
+              className="flex cursor-pointer justify-between"
+              onClick={() => router.push(`/profile/${podcaster.clerkId}`)}
+            >
               <figure className="flex items-center gap-2">
                 <Image
                   src={podcaster.imageUrl}
