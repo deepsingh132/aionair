@@ -43,10 +43,7 @@ const PodcastPlayer = () => {
   };
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted((prev) => !prev);
-    }
+    setIsMuted((prev) => !prev);
   };
 
   const forward = () => {
@@ -69,39 +66,31 @@ const PodcastPlayer = () => {
   };
 
   useEffect(() => {
-    const updateCurrentTime = () => {
-      if (audioRef.current) {
-        setCurrentTime(audioRef.current.currentTime);
-      }
-    };
-
     const audioElement = audioRef.current;
-    if (audioElement) {
-      audioElement.addEventListener("timeupdate", updateCurrentTime);
+    if (!audioElement) return;
 
-      return () => {
-        audioElement.removeEventListener("timeupdate", updateCurrentTime);
-      };
-    }
+    const updateCurrentTime = () => setCurrentTime(audioElement.currentTime);
+
+    audioElement.addEventListener("timeupdate", updateCurrentTime);
+
+    return () => {
+      audioElement.removeEventListener("timeupdate", updateCurrentTime);
+    };
   }, []);
 
   useEffect(() => {
     const audioElement = audioRef.current;
-    if (audio?.audioUrl) {
-      if (audioElement) {
-        audioElement.play().then(() => {
-          setIsPlaying(true);
-        });
-      }
-    } else {
-      audioElement?.pause();
+    if (!audioElement) return;
+    if (!audio?.audioUrl) {
+      audioElement.pause();
       setIsPlaying(false);
+      return;
     }
+    audioElement.play().then(() => setIsPlaying(true));
   }, [audio]);
   const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
+    if (!audioRef.current) return;
+    setDuration(audioRef.current.duration);
   };
 
   const handleAudioEnded = () => {
@@ -117,26 +106,29 @@ const PodcastPlayer = () => {
   const handleVolumeChange = (value: number) => {
     if (!audioRef.current) return;
     audioRef.current.volume = value / 100;
+    audioRef.current.muted = value === 0;
     setVolume(value);
+    setIsMuted(value === 0);
   };
 
   const handleProgressChange = (value: number) => {
     if (!audioRef.current) return;
-    audioRef.current.currentTime = value
+    audioRef.current.currentTime = value;
     setCurrentTime(value);
-  }
+  };
 
-  // mute the audio when the volume is 0
-  useEffect(() => {
-    if (!audioRef.current) return;
-    setIsMuted(volume === 0);
-  }, [volume]);
-
-  // set the volume to 0 when the audio is muted (Vice versa as above)
+  // set the volume to 0 when the audio is muted and vice versa
   useEffect(() => {
     if (!audioRef.current) return;
     setVolume(isMuted ? 0 : 100);
   }, [isMuted]);
+
+  // set the volume and muted state when the volume or muted state changes
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume / 100;
+    audioRef.current.muted = isMuted;
+  }, [volume, isMuted]);
 
   // increment views if user is not the author of the podcast
   useEffect(() => {
