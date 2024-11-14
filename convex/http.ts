@@ -20,7 +20,9 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         clerkId: event.data.id,
         email: event.data.email_addresses[0].email_address,
         imageUrl: event.data.image_url,
-        name: event.data.first_name!,
+        name: event.data.first_name
+          ? event.data.first_name + " " + (event.data.last_name ?? "")
+          : event.data.email_addresses[0].email_address.split("@")[0],
       });
       break;
     case "user.updated":
