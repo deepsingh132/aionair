@@ -8,14 +8,13 @@ import PodcastCard from "@/components/PodcastCard";
 import ProfileCard from "@/components/ProfileCard";
 import { api } from "@/convex/_generated/api";
 import { ProfilePodcastProps } from "@/types";
-import { useClerk } from "@clerk/nextjs";
 
 const MyProfilePage = () => {
 
-  const { user } = useClerk();
+  const user = useQuery(api.users.getUser);
 
   const podcastsData = useQuery(api.podcasts.getPodcastByAuthorId, {
-    authorId: user?.id!,
+    authorId: user?.clerkId!,
   }) as ProfilePodcastProps;
 
   if (!user || !podcastsData) return <LoaderSpinner />;
@@ -27,10 +26,10 @@ const MyProfilePage = () => {
       </h1>
       <div className="mt-6 flex flex-col gap-6 max-md:items-center md:flex-row">
         <ProfileCard
-          profileId={user.id}
+          profileId={user.clerkId}
           podcastData={podcastsData}
           imageUrl={user?.imageUrl!}
-          userFirstName={user.firstName!}
+          userFirstName={user.name}
         />
       </div>
       <section className="mt-9 flex flex-col gap-5">
